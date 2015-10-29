@@ -1,7 +1,7 @@
 from unittest import TestCase
 from random import randint, shuffle, random
-
 from classtools.cache import cached
+
 from myitertools.myrange import myrange
 from myitertools.sort import external_sort
 from linearmath.vector import Vector
