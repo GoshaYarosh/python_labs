@@ -1,5 +1,6 @@
 from random import random
 
+
 class Vector(object):
 
     def __init__(self, coords=list()):

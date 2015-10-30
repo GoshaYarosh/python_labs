@@ -6,6 +6,7 @@ class CircularList(list):
             while True:
                 for elem in elems.__iter__():
                     yield elem
+
     def __getitem__(self, index):
         if isinstance(index, slice):
             items = [

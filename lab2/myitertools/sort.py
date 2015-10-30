@@ -1,6 +1,7 @@
 from tempfile import TemporaryFile
 from random import randint
 
+
 def external_sort(source_file_name, reverse=False, chunk_size=100):
 
     def reset(source_file):
@@ -15,21 +16,24 @@ def external_sort(source_file_name, reverse=False, chunk_size=100):
     def split_file(source_file, low_part, high_part):
         length = file_length(source_file)
         source_file = reset(source_file)
-        low_part.writelines(source_file.readline() for i in xrange(length // 2))
+        low_part.writelines(
+            source_file.readline()
+            for i in xrange(length // 2)
+        )
         high_part.writelines(source_file.readlines())
 
     def sort_chunk(source_file):
-        numbers = [int(line) for line in source_file]
+        numbers = [float(line) for line in source_file]
         numbers.sort()
         source_file.seek(0)
-        source_file.writelines('{0}\n'.format(number) for number in numbers)
+        source_file.writelines('{0:g}\n'.format(number) for number in numbers)
 
     def merge_parts(dest_file, low_part, high_part):
         dest_file.truncate(0)
         low_part_number = low_part.readline()
         high_part_number = high_part.readline()
         while low_part_number and high_part_number:
-            if not reverse and int(low_part_number) < int(high_part_number):
+            if float(low_part_number) < float(high_part_number) and not reverse:
                 dest_file.write(low_part_number)
                 low_part_number = low_part.readline()
             else:
@@ -49,8 +53,11 @@ def external_sort(source_file_name, reverse=False, chunk_size=100):
                 split_file(source_file, low_part, high_part)
                 sort(reset(low_part))
                 sort(reset(high_part))
-                merge_parts(reset(source_file), reset(low_part), reset(high_part))
-
+                merge_parts(
+                    reset(source_file),
+                    reset(low_part),
+                    reset(high_part)
+                )
 
     with open(source_file_name, 'r+w') as source_file:
         if chunk_size > 0:

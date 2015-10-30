@@ -4,7 +4,7 @@ def myrange(start, stop=None, step=1):
         start = 0
 
     if step == 0:
-        raise ValueError('Step must be non-zero');
+        raise ValueError('Step must be non-zero')
 
     current = start
     while (current - stop) * step < 0:

@@ -6,6 +6,7 @@ from myitertools.myrange import myrange
 from myitertools.sort import external_sort
 from linearmath.vector import Vector
 from linearmath.linearfunction import LinearFunction
+from classtools.logger import Logger
 
 
 class VectorTest(TestCase):
@@ -35,6 +36,9 @@ class VectorTest(TestCase):
 
 
 class LinearFunctionTest(TestCase):
+
+    def test_string_representation(self):
+        pass
 
     def test_substitution(self):
         function = LinearFunction(random(), random())
@@ -111,3 +115,9 @@ class ExternalSortTest(TestCase):
         with self.assertRaises(ValueError):
             external_sort(self.testfile_name, chunk_size=0)
             external_sort(self.testfile_name, chunk_size=-100)
+
+
+class LoggerTest(TestCase):
+
+    class SomeLoggedClass(Logger):
+        pass
