@@ -3,29 +3,26 @@ from functools import wraps
 
 class Logger(object):
 
-    format_string = 'Invoke method: {0}\nArguments: positional - {1}, named - {2}\nResult: {3}\n\n'
+    default_log_format = ''.join((
+        'Method: {}\n',
+        'Arguments:  positional - {}, named - {}\n',
+        'Method result: {}\n',
+    ))
 
-    def log_method(self, function):
+    def __init__(self, log_format=default_log_format):
+        self.log = []
+        self.log_format = log_format
 
-        @wraps(function)
-        def wrapper(*args, **kwargs):
-            result = None
-            try:
-                result = function(*args, **kwargs)
-            except Exception as ex:
-                result = 'raised exception'
-            finally:
-                self.log += Logger.format_string.format(
-                    function.__name__,
-                    args,
-                    kwargs,
-                    result,
-                )
-
-        return wrapper
-
-    def __init__(self):
-        self.log = ''
+    def __str__(self):
+        log_string = ''
+        for method_invoke in self.log:
+            log_string += self.log_format.format(
+                method_invoke['method_name'],
+                method_invoke['args'],
+                method_invoke['kwargs'],
+                method_invoke['result'],
+            )
+        return log_string
 
     def __getattribute__(self, attribute_name):
         attribute = super(Logger, self).__getattribute__(attribute_name)
@@ -36,12 +33,22 @@ class Logger(object):
         else:
             return attribute
 
+    def log_method(self, method):
 
-logger = Logger()
-logger.some_method = lambda x, y: x + y
-logger.another_method = lambda x: x ** 2
-logger.some_method(1, 2)
-logger.another_method(10)
-logger.some_method('a', 'b')
+        @wraps(method)
+        def wrapper(*args, **kwargs):
+            result = None
+            try:
+                result = method(*args, **kwargs)
+            except Exception as ex:
+                result = ex
+                raise
+            finally:
+                self.log.append({
+                    'method_name': method.__name__,
+                    'args': args,
+                    'kwargs': kwargs,
+                    'result': result
+                })
 
-print logger.log
+        return wrapper

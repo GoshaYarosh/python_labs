@@ -2,11 +2,13 @@ from unittest import TestCase
 from random import randint, shuffle, random
 
 from classtools.cache import cached
+from classtools.logger import Logger
+from classtools.json import to_json
+from linearmath.linearfunction import LinearFunction
+from linearmath.vector import Vector
+from myitertools.linkedlist import LinkedList
 from myitertools.myrange import myrange
 from myitertools.sort import external_sort
-from linearmath.vector import Vector
-from linearmath.linearfunction import LinearFunction
-from classtools.logger import Logger
 
 
 class VectorTest(TestCase):
@@ -119,5 +121,104 @@ class ExternalSortTest(TestCase):
 
 class LoggerTest(TestCase):
 
-    class SomeLoggedClass(Logger):
-        pass
+    class LoggedClass(Logger):
+
+        def instance_method(self, a, b):
+            return a + b
+
+    def test_logger(self):
+        logged_class = LoggerTest.LoggedClass()
+        logged_class.instance_method(10, 20)
+        with self.assertRaises(TypeError):
+            logged_class.instance_method(10, '20')
+            logged_class.instance_method(object(), object())
+        self.assertEqual(logged_class.log[0]['result'], 30)
+        self.assertEqual(logged_class.log[0]['method_name'], 'instance_method')
+        self.assertNotEqual(logged_class.log[1]['result'], 30)
+
+
+class LinkedListTest(TestCase):
+
+    def test_adding_values(self):
+        values = []
+        linked_list = LinkedList()
+        for i in xrange(100):
+            value = randint(-1000, 1000)
+            values.append(value)
+            linked_list.add_last(value)
+        self.assertItemsEqual(linked_list, values)
+
+        for i in xrange(100):
+            value = randint(-1000, 1000)
+            values = [value] + values
+            linked_list.add_first(value)
+        self.assertItemsEqual(linked_list, values)
+
+        for i in xrange(50):
+            index = randint(0, len(linked_list) - 1)
+            value = randint(-10, 10)
+            values = values[:index] + [value] + values[index:]
+            linked_list.insert_at(value, index)
+        self.assertItemsEqual(linked_list, values)
+
+    def test_removing_values(self):
+        values = [randint(-1000, 1000) for i in xrange(400)]
+        linked_list = LinkedList(values)
+        for i in xrange(100):
+            self.assertEqual(values.pop(), linked_list.remove_last())
+        self.assertItemsEqual(values, linked_list)
+
+        for i in xrange(100):
+            self.assertEqual(values[0], linked_list.remove_first())
+            values = values[1:]
+        self.assertItemsEqual(values, linked_list)
+
+        for i in xrange(100):
+            index = randint(0, len(linked_list) - 1)
+            self.assertEqual(values[index], linked_list.remove_at(index))
+            del values[index]
+        self.assertItemsEqual(values, linked_list)
+
+    def test_indexing(self):
+        values = [randint(-1000, 1000) for i in xrange(400)]
+        linked_list = LinkedList(values)
+        for i in range(100):
+            index = randint(0, len(linked_list) - 1)
+            self.assertEqual(values[index], linked_list[index])
+
+        for i in range(100):
+            index = randint(0, len(linked_list) - 1)
+            value = randint(-1000, 1000)
+            values[index] = value
+            linked_list[index] = value
+        self.assertItemsEqual(values, linked_list)
+
+        for i in range(100):
+            index = randint(0, len(linked_list) - 1)
+            del values[index]
+            del linked_list[index]
+        self.assertItemsEqual(values, linked_list)
+
+    def test_filtering(self):
+        values = [randint(-1000, 1000) for i in xrange(1000)]
+        linked_list = LinkedList(values)
+        predicates = [
+            lambda value: value > 0,
+            lambda value: value % 2 == 0,
+            lambda value: value ** 2 < 10000
+        ]
+        for predicate in predicates:
+            values = filter(predicate, values)
+            linked_list.filter(predicate)
+            self.assertItemsEqual(values, linked_list)
+
+
+class JsonTest(TestCase):
+
+    def test_to_json(self):
+        obj = type('SomeClass', (object, ), {})()
+        obj.a = 1
+        obj.b = '1'
+        obj.c = [1, 2, 3]
+        print to_json(obj)
+        self.assertEqual(True, 0)
