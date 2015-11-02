@@ -4,6 +4,7 @@ from random import randint, shuffle, random
 from classtools.cache import cached
 from classtools.logger import Logger
 from classtools.json import to_json
+from classtools.sigleton import Singleton
 from linearmath.linearfunction import LinearFunction
 from linearmath.vector import Vector
 from myitertools.linkedlist import LinkedList
@@ -216,9 +217,25 @@ class LinkedListTest(TestCase):
 class JsonTest(TestCase):
 
     def test_to_json(self):
-        obj = type('SomeClass', (object, ), {})()
+        obj = type('some_class', (object, ), {})
         obj.a = 1
         obj.b = '1'
         obj.c = [1, 2, 3]
-        print to_json(obj)
-        self.assertEqual(True, 0)
+
+
+class SingletonTest(TestCase):
+
+    @Singleton
+    class SingletonedClass(object):
+        def __init__(self, some_arg):
+            self.arg = some_arg
+
+    def test_singleton(self):
+        first_obj = SingletonTest.SingletonedClass(10)
+        second_obj = SingletonTest.SingletonedClass(20)
+        self.assertTrue(first_obj is second_obj)
+        self.assertEqual(first_obj.arg, second_obj.arg, 10)
+        del first_obj
+        first_obj = SingletonTest.SingletonedClass(30)
+        self.assertTrue(first_obj is second_obj)
+        self.assertEqual(first_obj.arg, second_obj.arg, 10)
