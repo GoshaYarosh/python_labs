@@ -1,18 +1,30 @@
 from functools import wraps
 
 
-function_cache = dict()
+# dict of functions caches
+_function_caches = dict()
 
 
 def cached(function):
-    function_cache[function] = dict()
+    """cached function decorator
+
+    Cache arguments and result of functions. Thereby function isn't called
+    multiply times for the same arguments
+
+    Params:
+        function - a function that arguments and params will be cached
+    """
+
+    # create dict for current function cache
+    _function_caches[function] = dict()
 
     @wraps(function)
     def wrapper(*args, **kwargs):
+        # create unique key for the arguments
         key = 'args: {0}, kwargs: {1}'.format(args, kwargs)
-        current_cache = function_cache[function]
-        if key not in current_cache:
-            current_cache[key] = function(*args, **kwargs)
-        return current_cache[key]
+        current_function_cache = _function_caches[function]
+        if key not in current_function_cache:
+            current_function_cache[key] = function(*args, **kwargs)
+        return current_function_cache[key]
 
     return wrapper

@@ -3,11 +3,10 @@ from functools import wraps
 
 class Logger(object):
     '''Logger class.
-
     Log information about calls of all instance methods of object of class:
     method name, positional and named arguments, method result.
-
     You can specify the format string of calls logging. Info will be stored
+
     into this keyword arguments:
         method_name - the name of the called method
         args - positional arguments passed to the method

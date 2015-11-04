@@ -1,9 +1,9 @@
 from unittest import TestCase
-from random import randint, shuffle, random
+from random import randint, random
 from classtools.cache import cached
 
 from classtools.logger import Logger
-from classtools.json import to_json
+# from classtools.json import to_json
 from classtools.sigleton import Singleton
 from linearmath.linearfunction import LinearFunction
 from linearmath.vector import Vector
@@ -114,7 +114,7 @@ class ExternalSortTest(TestCase):
             self.assertItemsEqual(testfile.readlines(), lines)
 
     def test_chunk_size_exception(self):
-        lines = self.init_testfile()
+        self.init_testfile()
         with self.assertRaises(ValueError):
             external_sort(self.testfile_name, chunk_size=0)
             external_sort(self.testfile_name, chunk_size=-100)

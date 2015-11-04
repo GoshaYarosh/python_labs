@@ -4,11 +4,6 @@ class Singleton(object):
     Decorating some class makes it's object a sigleton. The first call of
     constructor will create instance of class and initialize it. Every other
     call of constructor will be returns the same instance.
-
-    Usage:
-        @Sigleton
-        class SomeSingletonClass(object):
-            pass
     """
 
     def __init__(self, cls):
