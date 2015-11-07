@@ -11,16 +11,15 @@ def cached(function):
     Cache arguments and result of functions. Thereby function isn't called
     multiply times for the same arguments
 
-    Params:
+    Arguments:
         function - a function that arguments and params will be cached
     """
 
-    # create dict for current function cache
+    # dict for current function cache
     _function_caches[function] = dict()
 
     @wraps(function)
     def wrapper(*args, **kwargs):
-        # create unique key for the arguments
         key = 'args: {0}, kwargs: {1}'.format(args, kwargs)
         current_function_cache = _function_caches[function]
         if key not in current_function_cache:

@@ -3,7 +3,7 @@ from random import randint, random
 from classtools.cache import cached
 
 from classtools.logger import Logger
-# from classtools.json import to_json
+from classtools.json import to_json, from_json
 from classtools.sigleton import Singleton
 from linearmath.linearfunction import LinearFunction
 from linearmath.vector import Vector
@@ -216,11 +216,43 @@ class LinkedListTest(TestCase):
 
 class JsonTest(TestCase):
 
+    def test_from_json(self):
+        obj = {
+            'a': 1,
+            'b': '2',
+            'c': [1, 2, ['1', '2', '3'], 3],
+        }
+        json_string = '{"a": 1, "b": "2", "c": [1, 2, ["1", "2", "3"], 3]}'
+        self.assertEqual(from_json(json_string), obj)
+
+        obj = {
+            'a': [1, 2, True],
+            'b': {'a': None, 'b': 1.0},
+            'c': [{'a': False}, [1, 2, None], "pipka"],
+            'd': {'a': 10, 'b': {'a': 20}}
+        }
+        json_string = """{
+            "a": [1, 2, true], "c": [{"a": false}, [1, 2, null], "pipka"]
+            "b": {"a": null, "b": 1.0},
+            "d": {"a": 10, "b": {"a": 20}}
+        }"""
+        self.assertEqual(from_json(json_string), obj)
+
     def test_to_json(self):
-        obj = type('some_class', (object, ), {})
-        obj.a = 1
-        obj.b = '1'
-        obj.c = [1, 2, 3]
+        obj = {
+            'a': 1,
+            'b': '2',
+            'c': [1, 2, ['1', '2', '3'], 3],
+        }
+        self.assertEqual(from_json(to_json(obj)), obj)
+
+        obj = {
+            'a': [1, 2, True],
+            'b': {'a': None, 'b': 1.0},
+            'd': {'a': 10, 'b': {'a': 20}},
+            'c': [{'a': False}, [1, 2, None], "pipka"],
+        }
+        self.assertEqual(from_json(to_json(obj)), obj)
 
 
 class SingletonTest(TestCase):

@@ -1,6 +1,3 @@
-from itertools import islice
-
-
 class LinkedListNode(object):
     """Node of linked list:
 

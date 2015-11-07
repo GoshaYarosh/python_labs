@@ -38,7 +38,9 @@ class Logger(object):
 
     def __getattribute__(self, attribute_name):
         attribute = super(Logger, self).__getattribute__(attribute_name)
+        # check if attribute is a method
         if callable(attribute) and attribute_name != 'log_method':
+            # return wrapper for method
             return self.log_method(attribute)
         else:
             return attribute
@@ -49,11 +51,14 @@ class Logger(object):
         def wrapper(*args, **kwargs):
             result = None
             try:
+                # try to call the wrapped method
                 result = method(*args, **kwargs)
             except Exception as ex:
+                # if raised exception stored it in result
                 result = ex
                 raise
             finally:
+                # finnaly log results
                 self.log.append({
                     'method_name': method.__name__,
                     'args': args,
