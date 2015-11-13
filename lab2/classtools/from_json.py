@@ -1,44 +1,4 @@
-import types
 import regex
-
-
-# converts some python object to json
-def _dict_to_json(dictionary):
-    json_items = [
-        '"{}": {}'.format(str(key), to_json(value))
-        for key, value in dictionary.items()
-    ]
-    return '{' + ', '.join(json_items) + '}'
-
-
-# converts python list or tuple to json sequence
-def _sequence_to_json(sequence):
-    json_sequence = ', '.join(
-        to_json(value) for value in sequence
-    )
-    return '[' + json_sequence + ']'
-
-
-# dictionary of python types and it json converters
-to_json_converters = {
-    types.DictType: _dict_to_json,
-    types.ListType: _sequence_to_json,
-    types.StringType: lambda string: '"' + string + '"',
-    types.BooleanType: lambda obj: str(obj).lower(),
-    types.IntType: str,
-    types.FloatType: str,
-    types.NoneType: lambda obj: 'null'
-}
-
-
-def to_json(obj):
-    if hasattr(obj, '__dict__'):
-        return to_json(obj.__dict__)
-    elif type(obj) in to_json_converters:
-        converter = to_json_converters[type(obj)]
-        return converter(obj)
-    else:
-        raise TypeError('Unsupported type: {0}'.format(type(obj)))
 
 
 # regular expressions for mathing json value types
@@ -100,6 +60,23 @@ from_json_converters = {
 
 
 def from_json(json_string):
+    """From_json function
+
+    Converts json object stored in string into python object:
+        json object -> python dict
+        json array -> python list
+        json string -> python string
+        json number -> python float or int
+        json true or false -> python bool
+        json null -> python None
+
+    Usage:
+        from_json('{"a": 1, "b": [1, 2, 3]}') -> {'a': 1, 'b': [1, 2, 3]}
+
+    Exceptions:
+        ValueError - json object has wrong syntax
+    """
+
     for type_pattern, parse_func in from_json_converters.items():
         if regex.match(type_pattern, json_string, flags=regex.DOTALL):
             return parse_func(json_string)
