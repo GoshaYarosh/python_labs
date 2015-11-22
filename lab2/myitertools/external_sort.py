@@ -1,19 +1,35 @@
 from tempfile import TemporaryFile
 
 
+# seek file to start
 def _reset(source_file):
     source_file.seek(0)
     return source_file
 
 
+# returns number of lines in file
 def _file_length(source_file):
     length = reduce(lambda length, line: length + 1, source_file, 0)
     source_file.seek(0)
     return length
 
 
-def external_sort(source_file_name, reverse=False, chunk_size=100):
+def external_sort(file_name, reverse=False, chunk_size=None):
+    '''External sort function
 
+    Sorts some file with numbers by merge sort alrorithm. File format: every
+    numbers must be stored in new line.
+
+    Params:
+        file_name - the name of file that you want sorted
+        reverse - if false sort by ascending, else sort by descending
+        chunk_size - size of maximal chunk that can be sorted in memory
+
+    Exceptions:
+        ValueError - if chunk size is zero
+    '''
+
+    # split file in two equal parts
     def split_file(source_file, low_part, high_part):
         length = _file_length(source_file)
         source_file = _reset(source_file)
@@ -23,12 +39,14 @@ def external_sort(source_file_name, reverse=False, chunk_size=100):
         )
         high_part.writelines(source_file.readlines())
 
+    # sort chunk by ordinary sort
     def sort_chunk(source_file):
         numbers = [float(line) for line in source_file]
         numbers.sort()
         source_file.seek(0)
         source_file.writelines('{0:g}\n'.format(number) for number in numbers)
 
+    # merge two files into one
     def merge_parts(dest_file, low_part, high_part):
         dest_file.truncate(0)
         low_part_number = low_part.readline()
@@ -60,8 +78,32 @@ def external_sort(source_file_name, reverse=False, chunk_size=100):
                     _reset(high_part)
                 )
 
-    with open(source_file_name, 'r+w') as source_file:
+    chunk_size = 100 if chunk_size is None else chunk_size
+    with open(file_name, 'r+') as source_file:
         if chunk_size > 0:
             sort(source_file)
         else:
             raise ValueError('Chunk size must be greater than zero')
+
+
+def main():
+    import argparse
+    import random
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('file_name', type=str, help='the name of file')
+    parser.add_argument('-c', '--create_file', action='store_true')
+    parser.add_argument('-r', '--reverse', action='store_true')
+    parser.add_argument('-cs', '--chunk_size', type=int)
+    args = parser.parse_args()
+
+    if args.create_file:
+        with open(args.file_name, 'w+') as f:
+            numbers = (str(random.randint(-1000, 1000)) for i in range(1000))
+            f.writelines('\n'.join(numbers))
+    else:
+        external_sort(args.file_name, args.reverse, args.chunk_size)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()

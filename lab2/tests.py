@@ -1,15 +1,16 @@
 from unittest import TestCase
 from random import randint, random
-from classtools.cache import cached
 
+from classtools.cached import cached
 from classtools.logger import Logger
-from classtools.json import to_json, from_json
+from classtools.from_json import from_json
+from classtools.to_json import to_json
 from classtools.sigleton import Singleton
 from linearmath.linearfunction import LinearFunction
 from linearmath.vector import Vector
-from myitertools.linkedlist import LinkedList
+from myitertools.filtered import Filtered
 from myitertools.myrange import myrange
-from myitertools.sort import external_sort
+from myitertools.external_sort import external_sort
 
 
 class VectorTest(TestCase):
@@ -36,6 +37,12 @@ class VectorTest(TestCase):
         self.assertEqual(self.vector + self.vector, self.vector * 2)
         self.assertEqual(self.vector - self.vector, self.vector * 0)
         self.assertEqual(self.vector * self.vector, self.vector * self.vector)
+        with self.assertRaises(ValueError):
+            self.vector + Vector.random(self.vector_length / 2)
+        with self.assertRaises(ValueError):
+            self.vector - Vector.random(self.vector_length / 2)
+        with self.assertRaises(ValueError):
+            self.vector * Vector.random(self.vector_length / 2)
 
 
 class LinearFunctionTest(TestCase):
@@ -47,6 +54,22 @@ class LinearFunctionTest(TestCase):
         function = LinearFunction(random(), random())
         self.assertEqual(function(0), function.b)
         self.assertEqual(function(1), function.a + function.b)
+
+    def test_composition(self):
+        first_function = LinearFunction(2, 2)
+        second_function = LinearFunction(5, 5)
+        self.assertEqual(LinearFunction(10, 12), first_function(second_function))
+        with self.assertRaises(TypeError):
+            first_function('some arg')
+
+    def test_tostring(self):
+        self.assertEqual(str(LinearFunction(0, 0)), 'f(x) = 0')
+        self.assertEqual(str(LinearFunction(1, 0)), 'f(x) = x')
+        self.assertEqual(str(LinearFunction(-1, 0)), 'f(x) = -x')
+        self.assertEqual(str(LinearFunction(5, 0)), 'f(x) = 5x')
+        self.assertEqual(str(LinearFunction(0, 5)), 'f(x) = 5')
+        self.assertEqual(str(LinearFunction(5, 5)), 'f(x) = 5x + 5')
+        self.assertEqual(str(LinearFunction(-5, -5)), 'f(x) = -5x - 5')
 
     def test_addition(self):
         function = LinearFunction(random(), random())
@@ -88,7 +111,7 @@ class MyRangeTest(TestCase):
 
 
 class ExternalSortTest(TestCase):
-    nums_count = 30
+    nums_count = 10000
     testfile_name = 'test.numbers'
 
     def init_testfile(self):
@@ -117,6 +140,7 @@ class ExternalSortTest(TestCase):
         self.init_testfile()
         with self.assertRaises(ValueError):
             external_sort(self.testfile_name, chunk_size=0)
+        with self.assertRaises(ValueError):
             external_sort(self.testfile_name, chunk_size=-100)
 
 
@@ -132,91 +156,43 @@ class LoggerTest(TestCase):
         logged_class.instance_method(10, 20)
         with self.assertRaises(TypeError):
             logged_class.instance_method(10, '20')
+        with self.assertRaises(TypeError):
             logged_class.instance_method(object(), object())
         self.assertEqual(logged_class.log[0]['result'], 30)
         self.assertEqual(logged_class.log[0]['method_name'], 'instance_method')
+        self.assertNotEqual(str(logged_class), '')
         self.assertNotEqual(logged_class.log[1]['result'], 30)
 
 
-class LinkedListTest(TestCase):
-
-    def test_adding_values(self):
-        values = []
-        linked_list = LinkedList()
-        for i in xrange(100):
-            value = randint(-1000, 1000)
-            values.append(value)
-            linked_list.add_last(value)
-        self.assertItemsEqual(linked_list, values)
-
-        for i in xrange(100):
-            value = randint(-1000, 1000)
-            values = [value] + values
-            linked_list.add_first(value)
-        self.assertItemsEqual(linked_list, values)
-
-        for i in xrange(50):
-            index = randint(0, len(linked_list) - 1)
-            value = randint(-10, 10)
-            values = values[:index] + [value] + values[index:]
-            linked_list.insert_at(value, index)
-        self.assertItemsEqual(linked_list, values)
-
-    def test_removing_values(self):
-        values = [randint(-1000, 1000) for i in xrange(400)]
-        linked_list = LinkedList(values)
-        for i in xrange(100):
-            self.assertEqual(values.pop(), linked_list.remove_last())
-        self.assertItemsEqual(values, linked_list)
-
-        for i in xrange(100):
-            self.assertEqual(values[0], linked_list.remove_first())
-            values = values[1:]
-        self.assertItemsEqual(values, linked_list)
-
-        for i in xrange(100):
-            index = randint(0, len(linked_list) - 1)
-            self.assertEqual(values[index], linked_list.remove_at(index))
-            del values[index]
-        self.assertItemsEqual(values, linked_list)
-
-    def test_indexing(self):
-        values = [randint(-1000, 1000) for i in xrange(400)]
-        linked_list = LinkedList(values)
-        for i in range(100):
-            index = randint(0, len(linked_list) - 1)
-            self.assertEqual(values[index], linked_list[index])
-
-        for i in range(100):
-            index = randint(0, len(linked_list) - 1)
-            value = randint(-1000, 1000)
-            values[index] = value
-            linked_list[index] = value
-        self.assertItemsEqual(values, linked_list)
-
-        for i in range(100):
-            index = randint(0, len(linked_list) - 1)
-            del values[index]
-            del linked_list[index]
-        self.assertItemsEqual(values, linked_list)
+class FilteredTest(TestCase):
 
     def test_filtering(self):
-        values = [randint(-1000, 1000) for i in xrange(1000)]
-        linked_list = LinkedList(values)
-        predicates = [
-            lambda value: value > 0,
-            lambda value: value % 2 == 0,
-            lambda value: value ** 2 < 10000
+        filter_functions = [
+            lambda elem: elem > 0,
+            lambda elem: elem % 5 == 0,
+            lambda elem: elem ** 2 > 100,
         ]
-        for predicate in predicates:
-            values = filter(predicate, values)
-            linked_list.filter(predicate)
-            self.assertItemsEqual(values, linked_list)
+        iterable = [
+            randint(-100, 100)
+            for i in range(1000)
+        ]
+        for filter_func in filter_functions:
+            filtered = Filtered(iterable, filter_func)
+            self.assertItemsEqual(filtered, filter(filter_func, iterable))
+            self.assertNotEqual(str(filtered), '')
 
 
 class JsonTest(TestCase):
 
     def test_from_json(self):
+        obj = {
+            'a': 1,
+            'b': 2,
+            'c': 3
+        }
+        json_string = '{"a": 1, "b": 2, "c": 3}'
+        self.assertEqual(from_json(json_string), obj)
+
         obj = {
             'a': 1,
             'b': '2',
@@ -238,6 +214,9 @@ class JsonTest(TestCase):
         }"""
         self.assertEqual(from_json(json_string), obj)
 
+        with self.assertRaises(ValueError):
+            print from_json('not json')
+
     def test_to_json(self):
         obj = {
             'a': 1,
@@ -253,6 +232,9 @@ class JsonTest(TestCase):
             'c': [{'a': False}, [1, 2, None], "pipka"],
         }
         self.assertEqual(from_json(to_json(obj)), obj)
+
+        with self.assertRaises(TypeError):
+            to_json(set([1, 2, 3, 2, 1]))
 
 
 class SingletonTest(TestCase):

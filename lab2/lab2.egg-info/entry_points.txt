@@ -1,0 +1,5 @@
+[console_scripts]
+external_sort = myitertools.external_sort:main
+myrange = myitertools.myrange:main
+filtered = myitertools.filtered:main
+
