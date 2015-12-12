@@ -1,0 +1,31 @@
+{% extends "pheonix/main.html" %}
+
+{% block content %}
+    <div id='login_form_container' class='container content'>
+        <form method="post">
+            {% csrf_token %}
+
+            {% for field in login_form %}
+                <div class='form-group {% if field.errors %} has-error has-feedback {% endif %}'>
+                    <label class='control-label' for='{{ field.name }}'>
+                        {{field.help_text}}:
+                    </label>
+                    {{ field }}
+                    <span class='glyphicon glyphicon-exclamation-sign form-control-feedback'></span>
+                </div>
+            {% endfor %}
+
+            <div id="login_button_container">
+                <button id='login_button' type='submit' class="btn btn-primary">
+                    <span class='glyphicon glyphicon-log-in'></span>
+                    Sign in
+                </button>
+
+                <a id='sign_up_link' href="{% url 'registration_view' %}">
+                    Sign up
+                </a>
+            </div>
+
+        </form>
+    </div>
+{% endblock %}

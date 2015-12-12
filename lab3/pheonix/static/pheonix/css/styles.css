@@ -1,0 +1,117 @@
+body {
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+
+    position: fixed;
+    display: flex;
+}
+
+textarea {
+    resize: vertical;
+}
+
+h1 {
+    font-size: 30px;
+    padding-bottom: 10px;
+}
+
+faded {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+.right-float {
+    float: right;
+}
+
+.main-container {
+    width: 60%;
+    background: white;
+}
+
+.long-button {
+    width: 200px;
+}
+
+.one-from-three {
+    width: 33.15%;
+}
+
+.fill-width {
+    width: 100%;
+}
+
+.content {
+    margin: auto;
+}
+
+.glyphicon {
+    margin-right: 4px;
+}
+
+.panel-heading {
+    width: 100%;
+}
+
+.scrollable {
+    margin:auto;
+    overflow-y: auto;
+    max-height: 100%;
+    width: 100%;
+}
+
+#login_form_container {
+    width: 300px;
+}
+
+#registation_form_container {
+    width: 300px;
+}
+
+#login_button_container {
+    display: flex;
+}
+
+#login_button {
+    width: 35%;
+}
+
+#sign_up_link {
+    width: 35%;
+    text-align: right;
+    margin: auto;
+    margin-right: 0px;
+}
+
+#pheonix_container {
+    margin-top: 0;
+    width: 100%;
+    display: flex;
+}
+
+#channels_container {
+    padding: 5px;
+    width: 40%;
+}
+
+#messages_container {
+    width: 60%;
+}
+
+#add_new_channel_panel {
+    margin-top: -10px;
+}
+
+#post_title {
+    margin-top: -10px;
+}
+
+#post_content {
+    margin-bottom: -10  px;
+}
+
+#post_container {
+    margin-top: 10px;
+    margin-bottom: 0px;
+}

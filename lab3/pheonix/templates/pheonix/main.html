@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% load staticfiles %}
+
+        <script src="{% static 'pheonix/js/jquery-1.11.3.min.js' %}"></script>
+        <script src="{% static 'pheonix/js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'pheonix/js/bootstrap-select.min.js' %}"></script>
+
+        <link rel="stylesheet" href="{% static 'pheonix/css/bootstrap-theme.min.css' %}">
+        <link rel="stylesheet" href="{% static 'pheonix/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'pheonix/css/docs.min.css' %}">
+        <link rel="stylesheet" href="{% static 'pheonix/css/bootstrap-select.min.css' %}">
+        <link rel="stylesheet" href="{% static 'pheonix/css/styles.css' %}">
+
+        <title>Pheonix</title>
+    </head>
+
+    <body>
+        <div class='container-flex scrollable'>
+            {% block content %}
+                <div class="jumbotron main-container content">
+                    <h1>Pheonix chat</h1>
+                    <p>
+                        Pheonix chat is a simple chat with all needed functionallity
+                        for communication beetween people in commands. Powered with django and bootstrap
+                    </p>
+                    </br>
+                    <p>
+                        <a class="btn btn-primary btn-lg long-button" role="button"
+                           href="{% url 'login_view' %}">
+                           <span class='glyphicon glyphicon-log-in'></span>
+                           Sign in
+                       </a>
+
+                       <a class="right-float btn btn-primary btn-lg long-button" role="button"
+                           href="{% url 'registration_view' %}">
+                           <span class='glyphicon glyphicon-user'></span>
+                           Sign up
+                       </a>
+                    </p>
+                </div>
+            {% endblock %}
+        </div>
+    </body>
+</html>

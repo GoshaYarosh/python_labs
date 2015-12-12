@@ -1,0 +1,191 @@
+{% extends "pheonix/main.html" %}
+
+{% block content %}
+    <div id='messages_container' class='container content'>
+            <h1>
+                Channel "{{ channel.title }}"
+                <a class='right-float' href="{% url 'channels_view' %}">View all channels</a>
+            </h1>
+
+            <div class="panel-group" id="accordion">
+                <div class="panel panel-primary">
+                    <div class="panel-heading" style='padding: 0px;'>
+                        <ul class="panel-title nav nav-pills">
+                            <li class='one-from-three active'>
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                                    <span class="glyphicon glyphicon-envelope"></span>
+                                    Send message
+                                </a>
+                            </li>
+                            <li class='one-from-three active'>
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                                    Send notification
+                                </a>
+                            </li>
+                            <li class='one-from-three active'>
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                    Create post
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse {{ message_collapsed }}">
+                        <div class="panel-body">
+                            <form method="post">
+                                {% csrf_token %}
+
+                                <input type="hidden" value='send_message' name='form_type'>
+                                {% for field in send_message_form %}
+                                    <div class='form-group {% if field.errors %} has-error has-feedback {% endif %}'>
+                                        <label class='control-label' for='{{ field.name }}'>
+                                            {{field.help_text}}:
+                                        </label>
+                                        {{ field }}
+                                        <span class='glyphicon glyphicon-exclamation-sign form-control-feedback'></span>
+                                    </div>
+                                {% endfor %}
+
+                                <button id='login_button' type='submit' class="btn btn-primary">
+                                    <span class="glyphicon glyphicon-send"></span>
+                                    Send message
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="collapseTwo" class="panel-collapse collapse {{ notification_form_collapsed }}">
+                        <div class="panel-body">
+                            <form method="post">
+                                {% csrf_token %}
+
+                                <input type="hidden" value='send_notification' name='form_type'>
+                                {% for field in send_notification_form %}
+                                    <div class='form-group {% if field.errors %} has-error has-feedback {% endif %}'>
+                                        <label class='control-label' for='{{ field.name }}'>
+                                            {{field.help_text}}:
+                                        </label></br>
+                                        {{ field }}
+                                        <span class='glyphicon glyphicon-exclamation-sign form-control-feedback'></span>
+                                    </div>
+                                {% endfor %}
+
+                                <button id='login_button' type='submit' class="btn btn-primary">
+                                    <span class="glyphicon glyphicon-send"></span>
+                                    Send notification
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="collapseThree" class="panel-collapse collapse {{ post_form_collapsed }}">
+                        <div class="panel-body">
+                            <form method="post">
+                                {% csrf_token %}
+
+                                <input type="hidden" value='create_post' name='form_type'>
+                                {% for field in create_post_form %}
+                                    <div class='form-group {% if field.errors %} has-error has-feedback {% endif %}'>
+                                        <label class='control-label' for='{{ field.name }}'>
+                                            {{field.help_text}}:
+                                        </label></br>
+                                        {{ field }}
+                                        <span class='glyphicon glyphicon-exclamation-sign form-control-feedback'></span>
+                                    </div>
+                                {% endfor %}
+
+                                <button id='login_button' type='submit' class="btn btn-primary">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                    Create post
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% for message in channel.messages.all %}
+                {% if message.type = 'Post' %}
+                    <div class='media list-group-item'>
+                        <div class='media-body'>
+                            <h5 class='media-heading'>
+                                <span class='glyphicon glyphicon-eye-open'></span>
+                                <faded>From</faded>
+                                <big>
+                                    {{ message.sent_by.first_name|truncatechars:15 }}
+                                    {{ message.sent_by.last_name|truncatechars:15 }}
+                                </big>
+                                <faded>at</faded>
+                                {{ message.sent_at|time:"H:i" }}
+                                <faded>{{ message.sent_at|date:"d M Y" }}</faded>
+                            </h5>
+                        </div>
+
+                        <div id='post_container' class='bs-callout bs-callout-default'>
+                            <h3 id='post_title'>{{ message.instance.title }}</h3>
+                            <h4><faded>{{ message.instance.description }}</faded></h4>
+                            <p id='post_content'>{{ message.content|truncatechars:500 }}</p>
+                        </div>
+                    </div>
+
+                {% elif message.type = 'Notification' %}
+                {% if message.instance.view = 'info' %}
+                    <div class='media list-group-item list-group-item-info'>
+                {% elif message.instance.view = 'alert' %}
+                    <div class='media list-group-item list-group-item-danger'>
+                {% elif message.instance.view = 'success' %}
+                    <div class='media list-group-item list-group-item-succes'>
+                {% elif message.instance.view = 'warning' %}
+                    <div class='media list-group-item list-group-item-warning'>
+                {% else %}
+                    <div class='media list-group-item'>
+                {% endif %}
+                        <div class='media-body'>
+                            <h5 class='media-heading'>
+                                {% if message.instance.view = 'info' %}
+                                    <span class='glyphicon glyphicon-info-sign'></span>
+                                {% elif message.instance.view = 'alert' %}
+                                    <span class='glyphicon glyphicon-exclamation-sign'></span>
+                                {% elif message.instance.view = 'success' %}
+                                    <span class='glyphicon glyphicon-ok-sign'></span>
+                                {% elif message.instance.view = 'warning' %}
+                                    <span class='glyphicon glyphicon-question-sign'></span>
+                                {% endif %}
+                                <faded>From</faded>
+                                <big>
+                                    {{ message.sent_by.first_name|truncatechars:15 }}
+                                    {{ message.sent_by.last_name|truncatechars:15 }}
+                                </big>
+                                <faded>at</faded>
+                                {{ message.sent_at|time:"H:i" }}
+                                <faded>{{ message.sent_at|date:"d M Y" }}</faded>
+                            </h5>
+                        <h3>{{ message.instance.title }}</h3>
+                        <p>{{ message.content|truncatechars:500 }}</p>
+                    </div>
+                </div>
+
+                {% elif message.type = 'Message' %}
+                    <div class='media list-group-item'>
+                        <div class='media-body'>
+                            <h5 class='media-heading'>
+                                <span class='glyphicon glyphicon-envelope'></span>
+                                <faded>From</faded>
+                                <big>
+                                    {{ message.sent_by.first_name|truncatechars:15 }}
+                                    {{ message.sent_by.last_name|truncatechars:15 }}
+                                </big>
+                                <faded>at</faded>
+                                {{ message.sent_at|time:"H:i" }}
+                                <faded>{{ message.sent_at|date:"d M Y" }}</faded>
+                            </h6>
+                        </div>
+                        <p>{{ message.content|truncatechars:500 }}</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <br/>
+        </div>
+    </div>
+{% endblock %}

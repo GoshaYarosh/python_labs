@@ -1,0 +1,45 @@
+{% extends "pheonix/main.html" %}
+
+{% block content %}
+    <div id='channels_container' class='container content'>
+            <h1>You belong to {{ channels.count }} channels:</h1>
+
+            <div class="list-group">
+                {% for channel in channels %}
+                    <a href='{% url "messages_view" channel.title %}' class='list-group-item'>
+                        <span class="badge">{{ channel.messages.count }} messages</span>
+                        <h4 class="list-group-item-heading">{{ channel.title }}</h4>
+                        <p class="list-group-item-text">{{ channel.description }}</p>
+                    </a>
+                {% endfor %}
+            </div>
+
+            <div id='add_new_channel_panel' class='panel panel-primary'>
+                <div class='panel-heading' data-toggle="collapse" data-target="#panel_body">
+                    <span class='glyphicon glyphicon-plus'></span>
+                    Add a new channel
+                </div>
+                <div id='panel_body' class='panel-collapse collapse {{ some_erors }}'>
+                    <div class='panel-body'>
+                        <form method="post">
+                            {% csrf_token %}
+
+                            {% for field in add_channel_form %}
+                                <div class='form-group {% if field.errors %} has-error has-feedback {% endif %}'>
+                                    <label class='control-label' for='{{ field.name }}'>
+                                        {{field.help_text}}:
+                                    </label>
+                                    {{ field }}
+                                    <span class='glyphicon glyphicon-exclamation-sign form-control-feedback'></span>
+                                </div>
+                            {% endfor %}
+
+                            <button id='login_button' type='submit' class="btn btn-primary">
+                                Add channel
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+    </div>
+{% endblock %}
